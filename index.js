@@ -1,55 +1,57 @@
-// import the pets array from data.js
-const pets = require('./data');
+// Import the pets array from data.js
+const pets = require("./data");
 
-// init express app
-const express = require('express');
+// Initialize Express application
+const express = require("express");
 const app = express();
-
 const PORT = 8080;
 
-// GET - / - returns homepage
-app.get('/', (req, res) => {
-    // serve up the public folder as static index.html file
+// Serve static files from the 'public' directory
+app.use(express.static("public"));
 
+// GET - / - Serve the homepage (index.html) from the public folder
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
 });
 
-// hello world route
-app.get('/api', (req, res) => {
-    res.send('Hello World!');
+// GET - /api - Simple hello world route for API testing
+app.get("/api", (req, res) => {
+  res.send("Hello World!");
 });
 
-// get all pets from the database
-app.get('/api/v1/pets', (req, res) => {
-    // send the pets array as a response
-
+// GET - /api/v1/pets - Retrieve all pets from the database
+app.get("/api/v1/pets", (req, res) => {
+  console.log("Fetching all pets:", pets);
+  res.json(pets);
 });
 
-// get pet by owner with query string
-app.get('/api/v1/pets/owner', (req, res) => {
-    // get the owner from the request
+// GET - /api/v1/pets/owner - Retrieve a pet by owner using a query string
+app.get("/api/v1/pets/owner", (req, res) => {
+  const { owner } = req.query;
+  const pet = pets.find((pet) => pet.owner === owner);
 
-
-    // find the pet in the pets array
-    const pet = pets.find(pet => pet.owner === owner);
-
-    // send the pet as a response
-
+  if (pet) {
+    res.status(200).json(pet);
+  } else {
+    res.status(404).json({ message: "No pet found for this owner" });
+  }
 });
 
-// get pet by name
-app.get('/api/v1/pets/:name', (req, res) => {
-    // get the name from the request
+// GET - /api/v1/pets/:name - Retrieve a pet by name using a route parameter
+app.get("/api/v1/pets/:name", (req, res) => {
+  const { name } = req.params;
+  const pet = pets.find((pet) => pet.name === name);
 
-
-    // find the pet in the pets array
-    const pet = pets.find(pet => pet.name === name);
-
-    // send the pet as a response
-
+  if (pet) {
+    res.status(200).json(pet);
+  } else {
+    res.status(404).json({ message: "Pet not found" });
+  }
 });
 
+// Start the server and listen on the specified port
 app.listen(PORT, () => {
-    console.log('Server is listening on port ' + PORT);
+  console.log(`Server is listening on port ${PORT}`);
 });
 
 module.exports = app;
